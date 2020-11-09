@@ -11,18 +11,18 @@
                   width="100">
                 </el-table-column>
                 <el-table-column
-                  property="registe_time"
+                  property="uploadTime"
                   label="注册日期"
                   width="220">
                 </el-table-column>
                 <el-table-column
                   property="username"
-                  label="用户姓名"
+                  label="提交人"
                   width="220">
                 </el-table-column>
                 <el-table-column
-                  property="city"
-                  label="注册地址">
+                  property="programName"
+                  label="项目名称">
                 </el-table-column>
             </el-table>
             <div class="Pagination" style="text-align: left;margin-top: 10px;">
@@ -46,21 +46,21 @@
         data(){
             return {
                 tableData: [{
-                  registe_time: '2016-05-02',
-                  username: '王小虎',
-                  city: '上海市普陀区金沙江路 1518 弄'
+                  uploadTime: '2020-11-02',
+                  username: '黄小虎',
+                  programName: '项目-团团买菜小程序'
                 }, {
-                  registe_time: '2016-05-04',
-                  username: '王小虎',
-                  city: '上海市普陀区金沙江路 1517 弄'
+                  uploadTime: '2020-11-04',
+                  username: '李小红',
+                  programName: '学生管理系统的设计与实现'
                 }, {
-                  registe_time: '2016-05-01',
-                  username: '王小虎',
-                  city: '上海市普陀区金沙江路 1519 弄'
+                  uploadTime: '2020-11-05',
+                  username: '王小乐',
+                  programName: '基于WEB的H5游戏设计开发与实现'
                 }, {
-                  registe_time: '2016-05-03',
-                  username: '王小虎',
-                  city: '上海市普陀区金沙江路 1516 弄'
+                  uploadTime: '2020-11-05',
+                  username: '刘大妮',
+                  programName: '基于深度学习的图像复原技术'
                 }],
                 currentRow: null,
                 offset: 0,
@@ -82,10 +82,11 @@
                     if (countData.status == 1) {
                         this.count = countData.count;
                     }else{
-                        throw new Error('获取数据失败');
+                      throw new Error('获取数据失败');
                     }
                     this.getUsers();
                 }catch(err){
+                    this.count = this.tableData.length;
                     console.log('获取数据失败', err);
                 }
             },
@@ -98,12 +99,10 @@
                 this.getUsers()
             },
             async getUsers(){
-                const Users = await getUserList({offset: this.offset, limit: this.limit});
-                this.tableData = [];
+                const Users = await getUserList({offset: this.offset, limit: this.limit}) || [];
                 Users.forEach(item => {
-                    const tableData = {};
                     tableData.username = item.username;
-                    tableData.registe_time = item.registe_time;
+                    tableData.upload_time = item.upload_time;
                     tableData.city = item.city;
                     this.tableData.push(tableData);
                 })

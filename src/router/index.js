@@ -4,6 +4,7 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 const login = r => require.ensure([], () => r(require('@/page/login')), 'login');
+
 const manage = r => require.ensure([], () => r(require('@/page/manage')), 'manage');
 const home = r => require.ensure([], () => r(require('@/page/home')), 'home');
 const addShop = r => require.ensure([], () => r(require('@/page/addShop')), 'addShop');
@@ -45,23 +46,23 @@ const routes = [
 		},{
 			path: '/userList',
 			component: userList,
-			meta: ['数据管理', '用户列表'],
+			meta: ['项目评审'],
 		},{
 			path: '/shopList',
 			component: shopList,
-			meta: ['数据管理', '商家列表'],
+			meta: ['项目管理'],
 		},{
 			path: '/foodList',
 			component: foodList,
-			meta: ['数据管理', '食品列表'],
+			meta: ['项目类别管理'],
 		},{
 			path: '/orderList',
 			component: orderList,
-			meta: ['数据管理', '订单列表'],
+			meta: ['专家管理'],
 		},{
 			path: '/adminList',
 			component: adminList,
-			meta: ['数据管理', '管理员列表'],
+			meta: ['项目管理', '管理员列表'],
 		},{
 			path: '/visitor',
 			component: visitor,
