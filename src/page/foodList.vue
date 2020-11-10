@@ -8,50 +8,17 @@
                 :expand-row-keys='expendRow'
                 :row-key="row => row.index"
                 style="width: 100%">
-                <el-table-column type="expand">
-                  <template slot-scope="props">
-                    <el-form label-position="left" inline class="demo-table-expand">
-                      <el-form-item label="食品名称">
-                        <span>{{ props.row.name }}</span>
-                      </el-form-item>
-                      <el-form-item label="餐馆名称">
-                        <span>{{ props.row.restaurant_name }}</span>
-                      </el-form-item>
-                      <el-form-item label="食品 ID">
-                        <span>{{ props.row.item_id }}</span>
-                      </el-form-item>
-                      <el-form-item label="餐馆 ID">
-                        <span>{{ props.row.restaurant_id }}</span>
-                      </el-form-item>
-                      <el-form-item label="食品介绍">
-                        <span>{{ props.row.description }}</span>
-                      </el-form-item>
-                      <el-form-item label="餐馆地址">
-                        <span>{{ props.row.restaurant_address }}</span>
-                      </el-form-item>
-                      <el-form-item label="食品评分">
-                        <span>{{ props.row.rating }}</span>
-                      </el-form-item>
-                      <el-form-item label="食品分类">
-                        <span>{{ props.row.category_name }}</span>
-                      </el-form-item>
-                      <el-form-item label="月销量">
-                        <span>{{ props.row.month_sales }}</span>
-                      </el-form-item>
-                    </el-form>
-                  </template>
+                <el-table-column
+                  label="类别ID"
+                  prop="classId">
                 </el-table-column>
                 <el-table-column
-                  label="食品名称"
-                  prop="name">
+                  label="类别名称"
+                  prop="className">
                 </el-table-column>
                 <el-table-column
-                  label="食品介绍"
-                  prop="description">
-                </el-table-column>
-                <el-table-column
-                  label="评分"
-                  prop="rating">
+                  label="所属大类"
+                  prop="superClass">
                 </el-table-column>
                 <el-table-column label="操作" width="160">
                   <template slot-scope="scope">
@@ -75,15 +42,13 @@
                   :total="count">
                 </el-pagination>
             </div>
-            <el-dialog title="修改食品信息" v-model="dialogFormVisible">
+            <el-dialog title="修改项目类别" v-model="dialogFormVisible">
                 <el-form :model="selectTable">
-                    <el-form-item label="食品名称" label-width="100px">
-                        <el-input v-model="selectTable.name" auto-complete="off"></el-input>
+                    
+                    <el-form-item label="项目类别名称" label-width="100px">
+                        <el-input v-model="selectTable.className"></el-input>
                     </el-form-item>
-                    <el-form-item label="食品介绍" label-width="100px">
-                        <el-input v-model="selectTable.description"></el-input>
-                    </el-form-item>
-                    <el-form-item label="食品分类" label-width="100px">
+                    <el-form-item label="所属大类" label-width="100px">
 	                    <el-select v-model="selectIndex" :placeholder="selectMenu.label" @change="handleSelect">
 						    <el-option
 						      v-for="item in menuOptions"
@@ -93,7 +58,7 @@
 						    </el-option>
 						</el-select>
                     </el-form-item>
-                    <el-form-item label="食品图片" label-width="100px">
+                    <!-- <el-form-item label="食品图片" label-width="100px">
                         <el-upload
                           class="avatar-uploader"
                           :action="baseUrl + '/v1/addimg/food'"
@@ -103,7 +68,7 @@
                           <img v-if="selectTable.image_path" :src="baseImgPath + selectTable.image_path" class="avatar">
                           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                         </el-upload>
-                    </el-form-item>
+                    </el-form-item> -->
                 </el-form>
                 <el-row style="overflow: auto; text-align: center;">
 	                <el-table
@@ -175,11 +140,39 @@
                 offset: 0,
                 limit: 20,
                 count: 0,
-                tableData: [],
+                tableData: [{
+                  classId: 1,
+                  className: "人工智能",
+                  superClass: "工程类"
+                },{
+                  classId: 2,
+                  className: "室内设计",
+                  superClass: "设计类"
+                },{
+                  classId: 3,
+                  className: "轨道交通",
+                  superClass: "建筑类"
+                }],
                 currentPage: 1,
                 selectTable: {},
                 dialogFormVisible: false,
-                menuOptions: [],
+                menuOptions: [{
+                  label: "工程类",
+                  value: "工程类",
+                  index: 1
+                },{
+                  label: "医学类",
+                  value: "医学类",
+                  index: 1
+                },{
+                  label: "设计类",
+                  value: "设计类",
+                  index: 1
+                },{
+                  label: "建筑类",
+                  value: "建筑类",
+                  index: 1
+                }],
                 selectMenu: {},
                 selectIndex: null,
                 specsForm: {
@@ -300,23 +293,29 @@
                 }
             },
             handleEdit(row) {
-            	this.getSelectItemData(row, 'edit')
-                this.dialogFormVisible = true;
-            },
-            async getSelectItemData(row, type){
-            	const restaurant = await getResturantDetail(row.restaurant_id);
-            	const category = await getMenuById(row.category_id)
-                this.selectTable = {...row, ...{restaurant_name: restaurant.name, restaurant_address: restaurant.address, category_name: category.name}};
-
-                this.selectMenu = {label: category.name, value: row.category_id}
-                this.tableData.splice(row.index, 1, {...this.selectTable});
+                console.log('row :>> ', row);
+                // this.getSelectItemData(row, 'edit')
                 this.$nextTick(() => {
                     this.expendRow.push(row.index);
                 })
-                if (type == 'edit' && this.restaurant_id != row.restaurant_id) {
-                	this.getMenu();
-                }
+                this.dialogFormVisible = true;
+
             },
+            // async getSelectItemData(row, type){
+            // 	// const restaurant = await getResturantDetail(row.restaurant_id);
+            // 	// const category = await getMenuById(row.category_id)
+            //     // this.selectTable = {...row, ...{restaurant_name: restaurant.name, restaurant_address: restaurant.address, category_name: category.name}};
+            //     console.log('this.selectTable :>> ', this.selectTable);
+            //     // this.selectMenu = {label: category.name, value: row.category_id}
+            //     console.log('this.selectMenu :>> ', this.selectMenu);
+            //     // this.tableData.splice(row.index, 1, {...this.selectTable});
+            //     this.$nextTick(() => {
+            //         this.expendRow.push(row.index);
+            //     })
+            //     if (type == 'edit' && this.restaurant_id != row.restaurant_id) {
+            //     	this.getMenu();
+            //     }
+            // },
             handleSelect(index){
             	this.selectIndex = index;
             	this.selectMenu = this.menuOptions[index];

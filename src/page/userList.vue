@@ -24,6 +24,10 @@
                   property="programName"
                   label="项目名称">
                 </el-table-column>
+                <!-- <el-table-column
+                  property="programName"
+                  label="项目名称">
+                </el-table-column> -->
             </el-table>
             <div class="Pagination" style="text-align: left;margin-top: 10px;">
                 <el-pagination
