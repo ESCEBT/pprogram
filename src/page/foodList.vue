@@ -2,6 +2,7 @@
     <div class="fillcontain">
         <head-top></head-top>
         <div class="table_container">
+          <el-button @click="handleAddData" style="margin-bottom:20px" >新增</el-button>
             <el-table
                 :data="tableData"
                 @expand='expand'
@@ -42,21 +43,20 @@
                   :total="count">
                 </el-pagination>
             </div>
-            <el-dialog title="修改项目类别" v-model="dialogFormVisible">
-                <el-form :model="selectTable">
-                    
+            <el-dialog :title="dialogTitle" v-model="dialogFormVisible">
+                <el-form :model="editInfo">
                     <el-form-item label="项目类别名称" label-width="100px">
-                        <el-input v-model="selectTable.className"></el-input>
+                        <el-input v-model="editInfo.className"></el-input>
                     </el-form-item>
                     <el-form-item label="所属大类" label-width="100px">
 	                    <el-select v-model="selectIndex" :placeholder="selectMenu.label" @change="handleSelect">
-						    <el-option
-						      v-for="item in menuOptions"
-						      :key="item.value"
-						      :label="item.label"
-						      :value="item.index">
-						    </el-option>
-						</el-select>
+                      <el-option
+                        v-for="item in menuOptions"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.index">
+                      </el-option>
+						        </el-select>
                     </el-form-item>
                     <!-- <el-form-item label="食品图片" label-width="100px">
                         <el-upload
@@ -70,58 +70,11 @@
                         </el-upload>
                     </el-form-item> -->
                 </el-form>
-                <el-row style="overflow: auto; text-align: center;">
-	                <el-table
-				    :data="specs"
-				    style="margin-bottom: 20px;"
-				    :row-class-name="tableRowClassName">
-					    <el-table-column
-					      prop="specs"
-					      label="规格">
-					    </el-table-column>
-					    <el-table-column
-					      prop="packing_fee"
-					      label="包装费">
-					    </el-table-column>
-					    <el-table-column
-					      prop="price"
-					      label="价格">
-					    </el-table-column>
-					    <el-table-column label="操作" >
-					    <template slot-scope="scope">
-					        <el-button
-					          size="small"
-					          type="danger"
-					          @click="deleteSpecs(scope.$index)">删除</el-button>
-					    </template>
-					    </el-table-column>
-					</el-table>
-					<el-button type="primary" @click="specsFormVisible = true" style="margin-bottom: 10px;">添加规格</el-button>
-				</el-row>
               <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="updateFood">确 定</el-button>
+                <el-button type="primary" @click="handleUpdateInfo">确 定</el-button>
               </div>
             </el-dialog>
-
-
-            <el-dialog title="添加规格" v-model="specsFormVisible">
-			  	<el-form :rules="specsFormrules" :model="specsForm">
-				    <el-form-item label="规格" label-width="100px" prop="specs">
-				     	<el-input v-model="specsForm.specs" auto-complete="off"></el-input>
-				    </el-form-item>
-				    <el-form-item label="包装费" label-width="100px">
-						<el-input-number v-model="specsForm.packing_fee" :min="0" :max="100"></el-input-number>
-					</el-form-item>
-					<el-form-item label="价格" label-width="100px">
-						<el-input-number v-model="specsForm.price" :min="0" :max="10000"></el-input-number>
-					</el-form-item>
-			  	</el-form>
-			  <div slot="footer" class="dialog-footer">
-			    <el-button @click="specsFormVisible = false">取 消</el-button>
-			    <el-button type="primary" @click="addspecs">确 定</el-button>
-			  </div>
-			</el-dialog>
         </div>
     </div>
 </template>
@@ -140,6 +93,8 @@
                 offset: 0,
                 limit: 20,
                 count: 0,
+                editInfo: {},
+                dialogTitle: "",
                 tableData: [{
                   classId: 1,
                   className: "人工智能",
@@ -163,15 +118,15 @@
                 },{
                   label: "医学类",
                   value: "医学类",
-                  index: 1
+                  index: 2
                 },{
                   label: "设计类",
                   value: "设计类",
-                  index: 1
+                  index: 3
                 },{
                   label: "建筑类",
                   value: "建筑类",
-                  index: 1
+                  index: 4
                 }],
                 selectMenu: {},
                 selectIndex: null,
@@ -222,6 +177,7 @@
                     }
                     this.getFoods();
                 }catch(err){
+                  this.count = this.tableData.length;
                     console.log('获取数据失败', err);
                 }
             },
@@ -293,13 +249,13 @@
                 }
             },
             handleEdit(row) {
-                console.log('row :>> ', row);
-                // this.getSelectItemData(row, 'edit')
+                this.dialogTitle = "修改项目类别";
+                this.editInfo = { ...row };
+                this.selectIndex = row.superClass;
                 this.$nextTick(() => {
-                    this.expendRow.push(row.index);
+                    this.expendRow.push(row.classId);
                 })
                 this.dialogFormVisible = true;
-
             },
             // async getSelectItemData(row, type){
             // 	// const restaurant = await getResturantDetail(row.restaurant_id);
@@ -318,27 +274,32 @@
             // },
             handleSelect(index){
             	this.selectIndex = index;
-            	this.selectMenu = this.menuOptions[index];
+              this.selectMenu = { ...this.menuOptions[index - 1] };
             },
-            async handleDelete(index, row) {
-                try{
-                    const res = await deleteFood(row.item_id);
-                    if (res.status == 1) {
-                        this.$message({
-                            type: 'success',
-                            message: '删除食品成功'
-                        });
-                        this.tableData.splice(index, 1);
-                    }else{
-                        throw new Error(res.message)
-                    }
-                }catch(err){
-                    this.$message({
-                        type: 'error',
-                        message: err.message
-                    });
-                    console.log('删除食品失败')
-                }
+            handleUpdateInfo() {
+              if(this.dialogTitle = "新增项目类别") {
+                this.tableData.push({
+                  classId: this.tableData.length + 1,
+                  className: this.editInfo.className, 
+                  superClass: this.menuOptions[this.selectIndex - 1].label
+                });
+              } else {
+                this.tableData[this.editInfo.classId - 1] = {
+                  classId: this.editInfo.classId,
+                  className: this.editInfo.className, 
+                  superClass: this.menuOptions[this.selectIndex - 1].label
+                };
+              }
+              this.dialogFormVisible = false;
+            },
+            handleDelete(row){
+              this.tableData.splice(row.classId - 1, 1);
+            },
+            handleAddData() {
+              this.dialogTitle = "新增项目类别";
+              this.dialogFormVisible = true;
+              this.editInfo  = {};
+
             },
             handleServiceAvatarScucess(res, file) {
                 if (res.status == 1) {
